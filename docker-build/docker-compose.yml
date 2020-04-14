@@ -1,0 +1,7 @@
+version: '1'
+
+services:
+  angular:
+    build: .
+    ports:
+      - 8080:80
