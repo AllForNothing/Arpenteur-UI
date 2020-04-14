@@ -1,0 +1,450 @@
+swagger: "2.0"
+info:
+  description: arpenteur server
+  title: arpenteur
+  version: 1.0.0
+host: localhost
+schemes:
+- http
+basePath: /api/v1
+produces:
+  - application/json
+consumes:
+  - application/json
+
+paths:
+  /:
+    get:
+      responses:
+        200:
+          description: Welcome message of arpenteur
+          schema:
+            type: object
+            properties:
+              appname:
+                type: string
+                minLength: 1
+              version:
+                type: string
+        default:
+          description: generic error response
+          schema:
+            $ref: "#/definitions/Error"
+  /scanners:
+    get:
+      tags:
+        - scanners
+      operationId: listScanners
+      parameters:
+        - name: since
+          in: query
+          type: integer
+          format: int64
+        - name: limit
+          in: query
+          type: integer
+          format: int64
+          default: 20
+      responses:
+        200:
+          description: list the reports operations
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Scanner"
+        default:
+          description: generic error response
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - scanners
+      operationId: addScanner
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/Scanner"
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: "#/definitions/Scanner"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+  /reports:
+    get:
+      tags:
+        - reports
+      operationId: listReports
+      parameters:
+        - name: digest
+          in: query
+          type: array
+          items:
+            type: string
+        - name: repo
+          in: query
+          type: string
+        - name: tag
+          in: query
+          type: string
+        - name: since
+          in: query
+          type: integer
+          format: int64
+        - name: limit
+          in: query
+          type: integer
+          format: int64
+          default: 20
+
+      responses:
+        200:
+          description: list the reports operations
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Report"
+        400:
+          description: error when list reports
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: generic error response
+          schema:
+            $ref: "#/definitions/Error"
+    post:
+      tags:
+        - reports
+      operationId: addReport
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/Report"
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: "#/definitions/Report"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+  /reports/{id}:
+    parameters:
+    - type: integer
+      format: int64
+      name: id
+      in: path
+      required: true
+    get:
+      tags:
+        - reports
+      operationId: getReport
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Report"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+    put:
+      tags:
+        - reports
+      operationId: updateReport
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: "#/definitions/Report"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/Report"
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/Error"
+    delete:
+      tags:
+        - reports
+      operationId: destroyReport
+      responses:
+        204:
+          $ref: '#/responses/204'
+  /webhooks/harbor:
+    post:
+      tags:
+        - harbor
+      operationId: ScanEvent
+      parameters:
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/HarborScanEvent'
+      responses:
+        202:
+          $ref: '#/responses/202'
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: '#/responses/500'
+
+
+responses:
+  200:
+    description: Success
+  201:
+    description: Created
+  202:
+    description: Accepted
+  204:
+    description: Deleted
+  400:
+    description: Bad request
+    schema:
+      $ref: '#/definitions/Errors'
+  401:
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/Errors'
+  403:
+    description: Forbidden
+    schema:
+      $ref: '#/definitions/Errors'
+  404:
+    description: Not found
+    schema:
+      $ref: '#/definitions/Errors'
+  409:
+    description: Conflict
+    schema:
+      $ref: '#/definitions/Errors'
+  500:
+    description: Internal server error
+    schema:
+      $ref: '#/definitions/Errors'
+
+definitions:
+  Errors:
+    description: The error array that describe the errors got during the handling of request
+    type: array
+    items:
+      $ref: '#/definitions/Error'
+  Error:
+    description: a model for all the error response coming from harbor
+    type: object
+    required:
+      - message
+    properties:
+      code:
+        type: integer
+        description: The error code
+      message:
+        type: string
+        description: The error message
+  Vulnerability:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        readOnly: true
+      package:
+        type: string
+        minLength: 1
+        maxLength: 255
+      version:
+        type: string
+        minLength: 1
+        maxLength: 64
+      fix_version:
+        type: string
+        minLength: 1
+        maxLength: 64
+      severity:
+        type: string
+        minLength: 1
+        maxLength: 32
+      description:
+        type: string
+      links:
+        type: array
+        items:
+          type: string
+  Repository:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        readOnly: true
+      digest:
+        type: string
+      repository:
+        type: string
+      Tag:
+        type: string
+      Registry:
+        type: string
+  Scanner:
+    type: object
+    required:
+      - name
+      - vendor
+      - version
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      vendor:
+        type: string
+      version:
+        type: string
+  Report:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        readOnly: true
+      digest:
+        type: string
+      revision:
+        type: integer
+      timestamp:
+        type: string
+        format: date-time
+      scanner:
+        $ref: '#/definitions/Scanner'
+      vulnerabilities:
+        type: array
+        items:
+          $ref: '#/definitions/Vulnerability'
+      repositories:
+        type: array
+        items:
+          $ref: '#/definitions/Repository'
+
+  HarborVulnerabilitySummary:
+    type: object
+    description: |
+      VulnerabilitySummary contains the total number of the foun d vulnerabilities number and numbers of each severity level.
+    properties:
+      total:
+        type: integer
+        format: int
+        description: 'The total number of the found vulnerabilities'
+        example: 500
+      fixable:
+        type: integer
+        format: int
+        description: 'The number of the fixable vulnerabilities'
+        example: 100
+      summary:
+        type: object
+        description: 'Numbers of the vulnerabilities with different severity'
+        additionalProperties:
+          type: integer
+          format: int
+          example: 10
+        example:
+          'Critical': 5
+          'High': 5
+
+  HarborReportSummary:
+    type: object
+    description: 'The summary for the native report'
+    properties:
+      report_id:
+        type: string
+        description: 'id of the native scan report'
+        example: '5f62c830-f996-11e9-957f-0242c0a89008'
+      scan_status:
+        type: string
+        description: 'The status of the report generating process'
+        example: 'Success'
+      severity:
+        type: string
+        description: 'The overall severity'
+        example: 'High'
+      duration:
+        type: integer
+        format: int64
+        description: 'The seconds spent for generating the report'
+        example: 300
+      summary:
+        $ref: '#/definitions/HarborVulnerabilitySummary'
+      start_time:
+        type: string
+        format: date-time
+        description: 'The start time of the scan process that generating report'
+        example: "2006-01-02T14:04:05"
+      end_time:
+        type: string
+        format: date-time
+        description: 'The end time of the scan process that generating report'
+        example: "2006-01-02T14:04:05"
+      scanner:
+        $ref: '#/definitions/Scanner'
+
+  HarborScanOverview:
+    type: object
+    description: 'The scan overview attached in the metadata of tag'
+    additionalProperties:
+      $ref: '#/definitions/HarborReportSummary'
+
+  HarborScanResource:
+    type: object
+    properties:
+      digest:
+        type: string
+      tag:
+        type: string
+      resource_url:
+        type: string
+      scan_overview:
+        $ref: '#/definitions/HarborScanOverview'
+
+  HarborScanRepository:
+    type: object
+    properties:
+      name:
+        type: string
+      namespace:
+        type: string
+      repo_full_name:
+        type: string
+      repo_type:
+        type:
+          string
+
+  HarborScanEvent:
+    type: object
+    properties:
+      type:
+        type: string
+      occur_at:
+        type: integer
+        format: int64
+      operator:
+        type: string
+      event_data:
+        type: object
+        properties:
+          resources:
+            type: array
+            items:
+              $ref: '#/definitions/HarborScanResource'
+          repository:
+            $ref: '#/definitions/HarborScanRepository'
+
+
