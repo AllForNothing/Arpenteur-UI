@@ -1,0 +1,13 @@
+import { NgModule } from '@angular/core';
+import { HomePageRoutingModule } from './home-page-routing.module';
+import { HomePageComponent } from './home-page.component';
+import { SharedModule } from '../../shared.module';
+
+@NgModule({
+  declarations: [HomePageComponent],
+  imports: [
+    HomePageRoutingModule,
+    SharedModule
+  ]
+})
+export class HomePageModule { }

@@ -1,0 +1,33 @@
+.v-center {
+  align-items: center;
+  font-size: 1.2rem;
+}
+.ml-1 {
+  margin-left: 1rem;
+}
+.ml-05 {
+  margin-left: 0.5rem;
+}
+.footer {
+ // color: #ffffff;
+  font-size: 1.2rem;
+  height: 2rem;
+  background-color: #0e161b;
+  display: flex;
+  align-items: center;
+}
+.copy-right {
+  margin-left: 2rem;
+  border-radius: 50%;
+  background-color: #ffffff;
+  height: 1rem;
+  display: inline-block;
+  line-height: 1rem;
+  width: 1rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: #000000;
+}
+.dimgray {
+  background-color: dimgray;
+}
